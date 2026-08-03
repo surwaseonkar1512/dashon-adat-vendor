@@ -146,6 +146,8 @@ const Dashboard = () => {
               { label: 'Receive Pay', icon: DollarSign, color: 'bg-emerald-50 text-emerald-700', path: '/ledgers?type=Customer&action=new' },
               { label: 'Farmer Pay', icon: CreditCard, color: 'bg-rose-50 text-rose-700', path: '/ledgers?type=Farmer&action=new' },
               { label: 'Reports', icon: FileText, color: 'bg-orange-50 text-orange-700', path: '/reports' },
+              { label: 'Rate Master', icon: TrendingUp, color: 'bg-pink-50 text-pink-700', path: '/rate-master' },
+              { label: 'Formulas', icon: Settings, color: 'bg-teal-50 text-teal-700', path: '/formulas' },
             ].map((action, idx) => (
               <button
                 key={idx}
