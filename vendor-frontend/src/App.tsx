@@ -19,7 +19,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        
+
         {/* Setup Wizard Route */}
         <Route path="/setup-wizard" element={<SetupWizard />} />
 
@@ -30,7 +30,7 @@ function App() {
           <Route path="farmers" element={<FarmerKyc />} />
           <Route path="purchases" element={<PurchaseBilling />} />
           <Route path="formulas" element={<FormulaMaster />} />
-          <Route path="rates" element={<RateMaster />} />
+          <Route path="rate-master" element={<RateMaster />} />
           <Route path="sales" element={<SalesBilling />} />
           <Route path="stock" element={<StockManagement />} />
           <Route path="ledgers" element={<PaymentsLedger />} />
