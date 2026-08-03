@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
 import { Search, Plus, X, Shield, CheckCircle, ArrowLeft } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Farmer {
   _id: string;
@@ -43,7 +44,6 @@ const FarmerKyc = () => {
   const [ifsc, setIfsc] = useState('');
   const [branch, setBranch] = useState('');
 
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   const fetchFarmers = async () => {
     try {

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../store/store';
 import { completeSetup } from '../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../config';
 
 interface Commodity {
   _id: string;
@@ -50,7 +51,6 @@ const SetupWizard = () => {
   const [salesRate, setSalesRate] = useState(5450);
   const [marketName, setMarketName] = useState('Latur APMC');
 
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   useEffect(() => {
     fetch(`${API_BASE}/commodities`)

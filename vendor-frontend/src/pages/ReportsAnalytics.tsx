@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { ArrowLeft, Download, Printer } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Purchase {
   billNumber: string;
@@ -23,7 +24,6 @@ const ReportsAnalytics = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   useEffect(() => {
     if (vendor?.tenantId) {

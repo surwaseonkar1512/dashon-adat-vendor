@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
 import { TrendingUp, Save, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Commodity {
   _id: string;
@@ -36,7 +37,6 @@ const RateMaster = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   const fetchData = async () => {
     try {

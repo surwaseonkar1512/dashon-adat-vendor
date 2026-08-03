@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
 import { Plus, X, ShoppingCart, Calendar, ArrowLeft } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Farmer {
   _id: string;
@@ -79,7 +80,6 @@ const PurchaseBilling = () => {
   const [selectedFormula, setSelectedFormula] = useState<Formula | null>(null);
   const [selectedRate, setSelectedRate] = useState<number>(5250);
 
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   const fetchData = async () => {
     try {

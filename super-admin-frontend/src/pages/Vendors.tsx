@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, X, Shield, Calendar, Key, AlertCircle } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Plan {
   _id: string;
@@ -40,7 +41,6 @@ const Vendors = () => {
   const [planId, setPlanId] = useState('');
   const [subscriptionDays, setSubscriptionDays] = useState(30);
 
-  const API_BASE = 'http://localhost:5000/api/v1/superadmin';
 
   const fetchData = async () => {
     try {

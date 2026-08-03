@@ -7,6 +7,7 @@ import {
   TrendingUp, DollarSign, User, LogOut, Truck, Settings, Users, CreditCard 
 } from 'lucide-react';
 import type { RootState } from '../store/store';
+import { API_BASE } from '../config';
 
 const Dashboard = () => {
   const { vendor } = useSelector((state: RootState) => state.auth);
@@ -24,7 +25,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (vendor?.tenantId) {
-      fetch(`http://localhost:5000/api/v1/vendor/dashboard-summary?tenantId=${vendor.tenantId}`)
+      fetch(`${API_BASE}/dashboard-summary?tenantId=${vendor.tenantId}`)
         .then(res => res.json())
         .then(data => {
           if (data.success) {

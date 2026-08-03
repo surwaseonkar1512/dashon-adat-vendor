@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { X, Calendar, ArrowLeft, ShoppingCart, User } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Customer {
   _id: string;
@@ -61,7 +62,6 @@ const SalesBilling = () => {
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerGstin, setCustomerGstin] = useState('');
 
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   const fetchData = async () => {
     try {

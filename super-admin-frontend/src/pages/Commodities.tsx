@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, X, Upload, CheckCircle, AlertCircle, FileSpreadsheet } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Commodity {
   _id: string;
@@ -30,7 +31,6 @@ const Commodities = () => {
   const [gstPercent, setGstPercent] = useState(5);
   const [hsnCode, setHsnCode] = useState('');
 
-  const API_BASE = 'http://localhost:5000/api/v1/superadmin';
 
   const fetchCommodities = async () => {
     try {

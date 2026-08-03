@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { Truck, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Warehouse {
   _id: string;
@@ -30,8 +31,6 @@ const WarehouseTransfer = () => {
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   useEffect(() => {
     if (vendor?.tenantId) {

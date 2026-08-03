@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { Archive, ArrowLeft, Settings } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Warehouse {
   _id: string;
@@ -48,7 +49,6 @@ const StockManagement = () => {
   const [adjType, setAdjType] = useState('Add'); // Add or Deduct
   const [adjReason, setAdjReason] = useState('Audit correction');
 
-  const API_BASE = 'http://localhost:5000/api/v1/vendor';
 
   const fetchData = async () => {
     try {
