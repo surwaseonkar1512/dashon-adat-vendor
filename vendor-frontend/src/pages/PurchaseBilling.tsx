@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
 import { Plus, X, ShoppingCart, Calendar, ArrowLeft } from 'lucide-react';
 import { API_BASE } from '../config';
+import { WeighingScaleConnector } from '../components/WeighingScaleConnector';
 
 interface Farmer {
   _id: string;
@@ -361,18 +362,21 @@ const PurchaseBilling = () => {
                 </select>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Gross Wt</label>
-                  <input type="number" required value={grossWeight} onChange={(e) => setGrossWeight(Number(e.target.value))} className="w-full border rounded-xl p-2 text-xs border-gray-200 text-right" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Bag Wt</label>
-                  <input type="number" required value={bagWeight} onChange={(e) => setBagWeight(Number(e.target.value))} className="w-full border rounded-xl p-2 text-xs border-gray-200 text-right" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Bags</label>
-                  <input type="number" required value={bagCount} onChange={(e) => setBagCount(Number(e.target.value))} className="w-full border rounded-xl p-2 text-xs border-gray-200 text-right" />
+              <div className="bg-white border rounded-xl p-3 mb-2 shadow-sm">
+                <WeighingScaleConnector onWeightChange={(weight) => setGrossWeight(weight)} className="mb-3" />
+                <div className="grid grid-cols-3 gap-2 border-t pt-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Gross Wt (KG)</label>
+                    <input type="number" required value={grossWeight} onChange={(e) => setGrossWeight(Number(e.target.value))} className="w-full border rounded-xl p-2 text-xs border-gray-200 text-right bg-gray-50 focus:bg-white transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Bag Wt</label>
+                    <input type="number" required value={bagWeight} onChange={(e) => setBagWeight(Number(e.target.value))} className="w-full border rounded-xl p-2 text-xs border-gray-200 text-right" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Bags</label>
+                    <input type="number" required value={bagCount} onChange={(e) => setBagCount(Number(e.target.value))} className="w-full border rounded-xl p-2 text-xs border-gray-200 text-right" />
+                  </div>
                 </div>
               </div>
 
