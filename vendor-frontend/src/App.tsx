@@ -11,7 +11,7 @@ import StockManagement from './pages/StockManagement';
 import PaymentsLedger from './pages/PaymentsLedger';
 import WarehouseTransfer from './pages/WarehouseTransfer';
 import ReportsAnalytics from './pages/ReportsAnalytics';
-import PrinterSettings from './pages/PrinterSettings';
+import BusinessSettings from './pages/BusinessSettings';
 import Layout from './components/Layout';
 
 function App() {
@@ -36,7 +36,7 @@ function App() {
           <Route path="ledgers" element={<PaymentsLedger />} />
           <Route path="transfers" element={<WarehouseTransfer />} />
           <Route path="reports" element={<ReportsAnalytics />} />
-          <Route path="settings" element={<PrinterSettings />} />
+          <Route path="settings" element={<BusinessSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>

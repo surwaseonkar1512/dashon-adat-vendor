@@ -59,7 +59,7 @@ export const loginVendor = async (req: Request, res: Response) => {
 // 2. Setup (Password Reset & Profile details)
 export const setupVendor = async (req: Request, res: Response) => {
   try {
-    const { tenantId, password, phone, ownerName } = req.body;
+    const { tenantId, password, phone, ownerName, logo, address, gstNumber } = req.body;
 
     const vendor = await Tenant.findOne({ tenantId });
     if (!vendor) {
@@ -71,6 +71,9 @@ export const setupVendor = async (req: Request, res: Response) => {
     }
     if (phone) vendor.phone = phone;
     if (ownerName) vendor.ownerName = ownerName;
+    if (logo) vendor.logo = logo;
+    if (address) vendor.address = address;
+    if (gstNumber) vendor.gstNumber = gstNumber;
 
     await vendor.save();
 
@@ -178,9 +181,10 @@ export const updateRate = async (req: Request, res: Response) => {
 export const createFarmer = async (req: Request, res: Response) => {
   try {
     const { 
-      tenantId, name, fatherName, mobile, gender, dob, 
-      village, taluka, district, state, pincode, 
-      aadhaarNumber, panNumber, bankDetails, landInfo 
+      tenantId, name, mobile, village, aadhaarNumber,
+      // Optional fields for Quick Registration or Full KYC
+      fatherName, gender, dob, taluka, district, state, pincode, 
+      panNumber, bankDetails, documents, kycStatus
     } = req.body;
 
     // Generate a unique Farmer ID
@@ -190,27 +194,48 @@ export const createFarmer = async (req: Request, res: Response) => {
       tenantId,
       farmerId,
       name,
-      fatherName,
       mobile,
+      village,
+      aadhaarNumber: aadhaarNumber || undefined, // undefined prevents unique index conflict on empty string
+      fatherName,
       gender,
       dob: dob ? new Date(dob) : undefined,
-      village,
       taluka,
       district,
       state,
       pincode,
-      aadhaarNumber,
       panNumber,
       bankDetails,
-      landInfo
+      documents,
+      kycStatus: kycStatus || 'Basic'
     });
 
     await farmer.save();
     res.status(201).json({ success: true, data: farmer });
   } catch (error: any) {
+    if (error.code === 11000) {
+       return res.status(400).json({ success: false, message: 'Mobile or Aadhaar already exists' });
+    }
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const updateFarmer = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+    
+    // Ensure empty strings for unique fields become undefined
+    if (updateData.aadhaarNumber === '') {
+      updateData.aadhaarNumber = undefined;
+    }
+
+    const farmer = await Farmer.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json({ success: true, data: farmer });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
 
 export const getFarmers = async (req: Request, res: Response) => {
   try {
@@ -225,11 +250,12 @@ export const getFarmers = async (req: Request, res: Response) => {
         { name: { $regex: search, $options: 'i' } },
         { mobile: { $regex: search, $options: 'i' } },
         { village: { $regex: search, $options: 'i' } },
-        { farmerId: { $regex: search, $options: 'i' } }
+        { farmerId: { $regex: search, $options: 'i' } },
+        { aadhaarNumber: { $regex: search, $options: 'i' } }
       ];
     }
 
-    const farmers = await Farmer.find(query);
+    const farmers = await Farmer.find(query).sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: farmers });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
@@ -244,8 +270,8 @@ export const getFarmerProfile = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: 'Farmer not found' });
     }
 
-    // Fetch purchases for this farmer
-    const purchases = await Purchase.find({ farmerId: id }).populate('commodityId');
+    // Fetch only finalized purchases for this farmer's ledger
+    const purchases = await Purchase.find({ farmerId: id, status: 'Finalized' }).populate('commodityId');
 
     // Calculate summary statistics
     let totalPurchases = purchases.length;
@@ -286,7 +312,7 @@ export const createPurchaseBill = async (req: Request, res: Response) => {
   try {
     const { 
       tenantId, farmerId, commodityId, grossWeight, bagWeight, bagCount, 
-      rate, deductionsApplied, totalAmount, netPayable, paymentStatus 
+      rate, deductionsApplied, totalAmount, netPayable, paymentStatus, status 
     } = req.body;
 
     const billNumber = `BILL_${Math.floor(Math.random() * 10000000)}`;
@@ -305,11 +331,29 @@ export const createPurchaseBill = async (req: Request, res: Response) => {
       deductionsApplied,
       totalAmount,
       netPayable,
-      paymentStatus: paymentStatus || 'Pending'
+      paymentStatus: paymentStatus || 'Pending',
+      status: status || 'Draft'
     });
 
     await purchase.save();
     res.status(201).json({ success: true, data: purchase });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updatePurchaseBill = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+    if (updateData.grossWeight && updateData.bagWeight) {
+      updateData.netWeight = updateData.grossWeight - updateData.bagWeight;
+    }
+    const purchase = await Purchase.findByIdAndUpdate(id, updateData, { new: true });
+    if (!purchase) {
+      return res.status(404).json({ success: false, message: 'Purchase not found' });
+    }
+    res.status(200).json({ success: true, data: purchase });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -341,6 +385,7 @@ export const getVendorDashboardSummary = async (req: Request, res: Response) => 
 
     const todayPurchases = await Purchase.find({
       tenantId,
+      status: 'Finalized',
       createdAt: { $gte: today }
     });
 
@@ -359,7 +404,7 @@ export const getVendorDashboardSummary = async (req: Request, res: Response) => 
     });
 
     const totalStockWeight = await Purchase.aggregate([
-      { $match: { tenantId } },
+      { $match: { tenantId, status: 'Finalized' } },
       { $group: { _id: null, totalStock: { $sum: '$netWeight' } } }
     ]);
 

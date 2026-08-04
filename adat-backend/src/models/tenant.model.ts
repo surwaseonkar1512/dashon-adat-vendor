@@ -14,6 +14,9 @@ export interface ITenant extends Document {
   subscriptionStart: Date;
   subscriptionEnd: Date;
   subscriptionDays: number;
+  logo?: string;
+  address?: string;
+  gstNumber?: string;
   comparePassword(password: string): Promise<boolean>;
 }
 
@@ -30,6 +33,9 @@ const TenantSchema: Schema = new Schema({
   subscriptionStart: { type: Date, required: true },
   subscriptionEnd: { type: Date, required: true },
   subscriptionDays: { type: Number, required: true },
+  logo: { type: String },
+  address: { type: String },
+  gstNumber: { type: String },
 }, { timestamps: true });
 
 // Hash password before saving

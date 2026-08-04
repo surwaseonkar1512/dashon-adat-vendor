@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
-import { Home, ShoppingCart, Archive, FileText, User } from 'lucide-react';
+import { Home, ShoppingCart, Archive, FileText, User, AlertTriangle } from 'lucide-react';
 
 const Layout = () => {
   const { isAuthenticated, vendor } = useSelector((state: RootState) => state.auth);
@@ -22,8 +22,8 @@ const Layout = () => {
   if (vendor?.status === 'Suspended') {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6 max-w-md mx-auto text-center space-y-4">
-        <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-2xl font-bold mx-auto mb-4">
-          ⚠️
+        <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mx-auto mb-4">
+          <AlertTriangle className="h-8 w-8" />
         </div>
         <h2 className="text-xl font-bold text-gray-900">Subscription Expired</h2>
         <p className="text-xs text-gray-500">Your account is suspended due to subscription expiration. Please renew your plan or contact the platform Super Admin.</p>

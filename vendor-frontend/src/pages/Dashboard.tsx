@@ -82,53 +82,41 @@ const Dashboard = () => {
         {/* Today's Summary (6 Cards) */}
         <div>
           <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Today's Summary</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-white rounded-xl p-3 shadow-xs border border-gray-100 flex items-center justify-between">
-              <div>
-                <span className="text-[9px] font-semibold text-gray-400 block uppercase">Today's Purchase</span>
-                <span className="text-sm font-extrabold text-gray-950">₹{stats.todayPurchaseAmount.toLocaleString()}</span>
-              </div>
-              <ShoppingCart className="h-4 w-4 text-green-500" />
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-white rounded-xl p-2.5 shadow-xs border border-gray-100 relative">
+              <ShoppingCart className="h-3.5 w-3.5 text-green-500 absolute top-2.5 right-2.5 opacity-50" />
+              <span className="text-[8px] font-semibold text-gray-400 block uppercase leading-tight pr-4">Purchase</span>
+              <span className="text-xs font-extrabold text-gray-950 mt-0.5 block">₹{stats.todayPurchaseAmount.toLocaleString()}</span>
             </div>
 
-            <div className="bg-white rounded-xl p-3 shadow-xs border border-gray-100 flex items-center justify-between">
-              <div>
-                <span className="text-[9px] font-semibold text-gray-400 block uppercase">Today's Sales</span>
-                <span className="text-sm font-extrabold text-gray-950">₹{stats.todaySalesAmount.toLocaleString()}</span>
-              </div>
-              <TrendingUp className="h-4 w-4 text-blue-500" />
+            <div className="bg-white rounded-xl p-2.5 shadow-xs border border-gray-100 relative">
+              <TrendingUp className="h-3.5 w-3.5 text-blue-500 absolute top-2.5 right-2.5 opacity-50" />
+              <span className="text-[8px] font-semibold text-gray-400 block uppercase leading-tight pr-4">Sales</span>
+              <span className="text-xs font-extrabold text-gray-950 mt-0.5 block">₹{stats.todaySalesAmount.toLocaleString()}</span>
             </div>
 
-            <div className="bg-white rounded-xl p-3 shadow-xs border border-gray-100 flex items-center justify-between">
-              <div>
-                <span className="text-[9px] font-semibold text-gray-400 block uppercase">Today's Collection</span>
-                <span className="text-sm font-extrabold text-gray-950">₹{stats.todayCollectionAmount.toLocaleString()}</span>
-              </div>
-              <DollarSign className="h-4 w-4 text-primary" />
+            <div className="bg-white rounded-xl p-2.5 shadow-xs border border-gray-100 relative">
+              <DollarSign className="h-3.5 w-3.5 text-primary absolute top-2.5 right-2.5 opacity-50" />
+              <span className="text-[8px] font-semibold text-gray-400 block uppercase leading-tight pr-4">Collection</span>
+              <span className="text-xs font-extrabold text-gray-950 mt-0.5 block">₹{stats.todayCollectionAmount.toLocaleString()}</span>
             </div>
 
-            <div className="bg-white rounded-xl p-3 shadow-xs border border-gray-100 flex items-center justify-between">
-              <div>
-                <span className="text-[9px] font-semibold text-gray-400 block uppercase">Stock Available</span>
-                <span className="text-sm font-extrabold text-gray-950">{stats.currentStock}</span>
-              </div>
-              <Archive className="h-4 w-4 text-amber-500" />
+            <div className="bg-white rounded-xl p-2.5 shadow-xs border border-gray-100 relative">
+              <Archive className="h-3.5 w-3.5 text-amber-500 absolute top-2.5 right-2.5 opacity-50" />
+              <span className="text-[8px] font-semibold text-gray-400 block uppercase leading-tight pr-4">Stock</span>
+              <span className="text-xs font-extrabold text-gray-950 mt-0.5 block">{stats.currentStock}</span>
             </div>
 
-            <div className="bg-white rounded-xl p-3 shadow-xs border border-gray-100 flex items-center justify-between">
-              <div>
-                <span className="text-[9px] font-semibold text-gray-400 block uppercase">Farmer Pending</span>
-                <span className="text-sm font-extrabold text-gray-950">₹{stats.pendingFarmerPayment.toLocaleString()}</span>
-              </div>
-              <CreditCard className="h-4 w-4 text-red-500" />
+            <div className="bg-white rounded-xl p-2.5 shadow-xs border border-gray-100 relative">
+              <CreditCard className="h-3.5 w-3.5 text-red-500 absolute top-2.5 right-2.5 opacity-50" />
+              <span className="text-[8px] font-semibold text-gray-400 block uppercase leading-tight pr-4">Farm Pay</span>
+              <span className="text-xs font-extrabold text-gray-950 mt-0.5 block">₹{stats.pendingFarmerPayment.toLocaleString()}</span>
             </div>
 
-            <div className="bg-white rounded-xl p-3 shadow-xs border border-gray-100 flex items-center justify-between">
-              <div>
-                <span className="text-[9px] font-semibold text-gray-400 block uppercase">Customer Collection</span>
-                <span className="text-sm font-extrabold text-gray-950">₹{stats.pendingCustomerCollection.toLocaleString()}</span>
-              </div>
-              <Users className="h-4 w-4 text-purple-500" />
+            <div className="bg-white rounded-xl p-2.5 shadow-xs border border-gray-100 relative">
+              <Users className="h-3.5 w-3.5 text-purple-500 absolute top-2.5 right-2.5 opacity-50" />
+              <span className="text-[8px] font-semibold text-gray-400 block uppercase leading-tight pr-4">Cust Coll</span>
+              <span className="text-xs font-extrabold text-gray-950 mt-0.5 block">₹{stats.pendingCustomerCollection.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -166,8 +154,8 @@ const Dashboard = () => {
         {/* Quick Settings Shortcut */}
         <div className="bg-white border rounded-xl p-3 shadow-xs flex justify-between items-center">
           <div>
-            <h4 className="font-bold text-gray-900 text-xs">Printer Integration Setup</h4>
-            <p className="text-[10px] text-gray-400">Configure Bluetooth Thermal printers (58mm/80mm)</p>
+            <h4 className="font-bold text-gray-900 text-xs">Business & Printer Settings</h4>
+            <p className="text-[10px] text-gray-400">Configure profile & printing</p>
           </div>
           <button onClick={() => navigate('/settings')} className="bg-gray-100 hover:bg-gray-200 p-2 rounded-xl text-gray-600">
             <Settings className="h-4.5 w-4.5" />
@@ -211,7 +199,7 @@ const Dashboard = () => {
                 </button>
                 <button onClick={() => { setIsDrawerOpen(false); navigate('/settings'); }} className="w-full flex items-center p-2.5 rounded-xl hover:bg-gray-50 text-xs font-semibold text-gray-700">
                   <Settings className="h-4 w-4 mr-3 text-gray-400" />
-                  Printer Settings
+                  Business & Printer Settings
                 </button>
               </nav>
             </div>

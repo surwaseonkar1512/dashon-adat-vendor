@@ -9,6 +9,9 @@ interface VendorState {
   phone: string;
   status: string;
   subscriptionEnd: string;
+  logo?: string;
+  address?: string;
+  gstNumber?: string;
 }
 
 interface AuthState {
@@ -45,6 +48,12 @@ const authSlice = createSlice({
         localStorage.setItem('vendorData', JSON.stringify(state.vendor));
       }
     },
+    updateVendorProfile: (state, action: PayloadAction<Partial<VendorState>>) => {
+      if (state.vendor) {
+        state.vendor = { ...state.vendor, ...action.payload };
+        localStorage.setItem('vendorData', JSON.stringify(state.vendor));
+      }
+    },
     logout: (state) => {
       state.isAuthenticated = false;
       state.vendor = null;
@@ -55,5 +64,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, completeSetup, logout } = authSlice.actions;
+export const { loginSuccess, completeSetup, updateVendorProfile, logout } = authSlice.actions;
 export default authSlice.reducer;

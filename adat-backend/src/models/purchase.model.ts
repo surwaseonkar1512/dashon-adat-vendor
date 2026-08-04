@@ -19,6 +19,7 @@ export interface IPurchase extends Document {
   totalAmount: number;
   netPayable: number;
   paymentStatus: 'Pending' | 'Paid';
+  status: 'Draft' | 'Finalized';
 }
 
 const PurchaseSchema: Schema = new Schema({
@@ -41,7 +42,8 @@ const PurchaseSchema: Schema = new Schema({
   ],
   totalAmount: { type: Number, required: true },
   netPayable: { type: Number, required: true },
-  paymentStatus: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' }
+  paymentStatus: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },
+  status: { type: String, enum: ['Draft', 'Finalized'], default: 'Draft' }
 }, { timestamps: true });
 
 export default mongoose.model<IPurchase>('Purchase', PurchaseSchema);
