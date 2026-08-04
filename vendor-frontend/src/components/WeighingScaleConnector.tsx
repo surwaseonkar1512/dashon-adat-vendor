@@ -35,7 +35,7 @@ export const WeighingScaleConnector: React.FC<Props> = ({ onWeightChange, classN
       // Request a port and open a connection.
       // We assume standard baud rate 9600 for Phoenix scales.
       const port = await (navigator as any).serial.requestPort();
-      
+
       try {
         await port.open({ baudRate: 9600 });
       } catch (openErr: any) {
@@ -44,7 +44,7 @@ export const WeighingScaleConnector: React.FC<Props> = ({ onWeightChange, classN
           throw openErr;
         }
       }
-      
+
       portRef.current = port;
       setIsConnected(true);
 
@@ -58,6 +58,8 @@ export const WeighingScaleConnector: React.FC<Props> = ({ onWeightChange, classN
       const reader = textDecoder.readable.getReader();
       readerRef.current = reader;
 
+      console.log('readableStreamClosed', readableStreamClosed)
+
       let buffer = '';
 
       // Listen to data coming from the serial device.
@@ -68,7 +70,7 @@ export const WeighingScaleConnector: React.FC<Props> = ({ onWeightChange, classN
           reader.releaseLock();
           break;
         }
-        
+
         // Append new data to our buffer
         if (value) {
           buffer += value;
@@ -141,11 +143,10 @@ export const WeighingScaleConnector: React.FC<Props> = ({ onWeightChange, classN
         <button
           type="button"
           onClick={isConnected ? disconnect : connectSerial}
-          className={`flex-1 flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${
-            isConnected
-              ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
-              : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100'
-          }`}
+          className={`flex-1 flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${isConnected
+            ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
+            : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100'
+            }`}
         >
           {isConnected ? (
             <>
@@ -160,7 +161,7 @@ export const WeighingScaleConnector: React.FC<Props> = ({ onWeightChange, classN
           )}
         </button>
       </div>
-      
+
       {error && (
         <div className="flex items-center text-xs text-red-600 mt-1">
           <AlertCircle className="w-3 h-3 mr-1" />
