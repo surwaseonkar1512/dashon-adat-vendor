@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ const Login = () => {
       );
       navigate('/dashboard');
     } else {
-      alert('Invalid credentials (use admin@adat.com / admin)');
+      toast.error('Invalid credentials (use admin@adat.com / admin)');
     }
   };
 

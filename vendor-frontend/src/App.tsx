@@ -13,10 +13,12 @@ import WarehouseTransfer from './pages/WarehouseTransfer';
 import ReportsAnalytics from './pages/ReportsAnalytics';
 import BusinessSettings from './pages/BusinessSettings';
 import Layout from './components/Layout';
+import { Toaster } from 'sonner';
 
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" richColors />
       <Routes>
         <Route path="/login" element={<Login />} />
 

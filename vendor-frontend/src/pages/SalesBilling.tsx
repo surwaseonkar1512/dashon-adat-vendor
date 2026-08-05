@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { X, Calendar, ArrowLeft, ShoppingCart, User, Printer, Download, Send, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { API_BASE } from '../config';
 
 interface Customer {
@@ -167,11 +168,12 @@ const SalesBilling = () => {
       if (data.success) {
         await fetchData();
         setViewingInvoice(null);
+        toast.success('Draft finalized successfully');
       } else {
-        alert(data.message || 'Failed to finalize draft');
+        toast.error(data.message || 'Failed to finalize draft');
       }
     } catch (err) {
-      alert('Error finalizing draft');
+      toast.error('Error finalizing draft');
     } finally {
       setIsFinalizing(false);
     }
@@ -550,7 +552,7 @@ const SalesBilling = () => {
             {/* Actions Bar */}
             <div className="p-4 border-t bg-gray-50 grid grid-cols-2 gap-2">
               <button
-                onClick={() => alert('[Simulating Thermal Bluetooth Output]')}
+                onClick={() => toast.info('[Simulating Thermal Bluetooth Output]')}
                 className="bg-primary hover:bg-green-700 text-white font-bold py-2 rounded-xl flex items-center justify-center"
               >
                 <Printer className="w-4 h-4 mr-2" /> Print Thermal
@@ -562,7 +564,7 @@ const SalesBilling = () => {
                 <Download className="w-4 h-4 mr-2" /> Download PDF
               </button>
               <button
-                onClick={() => alert('[Sharing Invoice details directly to WhatsApp]')}
+                onClick={() => toast.success('[Sharing Invoice details directly to WhatsApp]')}
                 className="col-span-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold py-2 rounded-xl text-center flex items-center justify-center"
               >
                 <Send className="w-4 h-4 mr-2" /> Share WhatsApp

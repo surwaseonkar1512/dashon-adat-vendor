@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Image as ImageIcon, Upload, X, Eye, Download, Trash2, FileText, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { API_BASE } from '../config';
 
 export interface DocumentMetadata {
@@ -49,7 +50,7 @@ export const DocumentUploader = ({
       setShowBottomSheet(false);
     } catch (error) {
       console.error('Upload failed', error);
-      alert('Upload failed. Please try again.');
+      toast.error('Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

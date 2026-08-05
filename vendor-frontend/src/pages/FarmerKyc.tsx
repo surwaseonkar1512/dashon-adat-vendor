@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
-import { Search, Shield, CheckCircle, ArrowLeft, Info, Clock, Plus } from 'lucide-react';
+import { ArrowLeft, Shield, CheckCircle, Info, Search, Clock, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { API_BASE } from '../config';
 import { FarmerStepper } from '../components/FarmerStepper';
 import { DocumentUploader } from '../components/DocumentUploader';
@@ -88,7 +89,7 @@ const FarmerKyc = () => {
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe || isRightSwipe) {
       const currentIndex = tabs.indexOf(activeTab);
       if (isLeftSwipe && currentIndex < tabs.length - 1) {
@@ -208,17 +209,17 @@ const FarmerKyc = () => {
 
   const handleDocumentDelete = async (indexToDelete: number, documentType: string) => {
     if (!selectedFarmer || !selectedFarmer.documents) return;
-    
+
     // Find the actual index in the main array
     const typeDocs = selectedFarmer.documents.filter(d => d.documentType === documentType);
     const docToDelete = typeDocs[indexToDelete];
     const actualIndex = selectedFarmer.documents.findIndex(d => d === docToDelete);
-    
+
     if (actualIndex > -1) {
       const updatedDocs = [...selectedFarmer.documents];
       updatedDocs.splice(actualIndex, 1);
       setSelectedFarmer({ ...selectedFarmer, documents: updatedDocs });
-      
+
       try {
         await fetch(`${API_BASE}/farmers/${selectedFarmer._id}`, {
           method: 'PUT',
@@ -241,8 +242,15 @@ const FarmerKyc = () => {
         body: JSON.stringify(selectedFarmer)
       });
       const data = await res.json();
-      if (data.success) setSelectedFarmer(data.data);
-    } catch (err) { }
+      if (data.success) {
+        toast.success('Farmer details updated successfully');
+        setSelectedFarmer(data.data);
+      } else {
+        toast.error('Failed to update details');
+      }
+    } catch (err) {
+      toast.error('Error saving details');
+    }
   };
 
 
@@ -255,7 +263,7 @@ const FarmerKyc = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paymentStatus: 'Paid' })
       });
-      
+
       // 2. Create Ledger entry
       const paymentRes = await fetch(`${API_BASE}/payments/farmer`, {
         method: 'POST',
@@ -270,15 +278,15 @@ const FarmerKyc = () => {
         })
       });
 
-      if (updateRes.ok && paymentRes.ok) {
-        alert('Payment processed successfully!');
+      const data = await paymentRes.json();
+      if (updateRes.ok && data.success) {
+        toast.success('Payment processed successfully!');
         fetchFarmerData();
       } else {
-        alert('Payment failed.');
+        toast.error(data.message || 'Payment failed.');
       }
     } catch (err) {
-      console.error(err);
-      alert('Payment error');
+      toast.error('Payment error');
     }
   };
 
@@ -312,7 +320,7 @@ const FarmerKyc = () => {
           ))}
         </div>
 
-        <div 
+        <div
           className="p-4 max-w-md mx-auto min-h-[50vh]"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
@@ -354,8 +362,8 @@ const FarmerKyc = () => {
           {/* TAB: LAND DOCUMENTS */}
           {activeTab === 'Land Documents' && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-              <DocumentUploader 
-                title="7/12 Records" 
+              <DocumentUploader
+                title="7/12 Records"
 
                 documents={(selectedFarmer.documents || []).filter((d: any) => d.documentType === '7/12')}
                 onUpload={(file, meta) => { setUploadType('7/12'); setDocMeta(meta as any); return handleFileUpload({ target: { files: [file] } } as any); }}
@@ -363,8 +371,8 @@ const FarmerKyc = () => {
                 allowMultiple={true}
                 showSurveyNumber={true}
               />
-              <DocumentUploader 
-                title="8A Records" 
+              <DocumentUploader
+                title="8A Records"
 
                 documents={(selectedFarmer.documents || []).filter((d: any) => d.documentType === '8A')}
                 onUpload={(file, meta) => { setUploadType('8A'); setDocMeta(meta as any); return handleFileUpload({ target: { files: [file] } } as any); }}
@@ -382,16 +390,16 @@ const FarmerKyc = () => {
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center"><Shield className="w-4 h-4 mr-2 text-primary" /> Aadhaar Details</h3>
                 <input type="text" placeholder="12-digit Aadhaar Number" value={selectedFarmer.aadhaarNumber || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, aadhaarNumber: e.target.value })} className="w-full border rounded-lg p-2 text-sm mb-3" />
                 <div className="space-y-4 mt-4">
-                  <DocumentUploader 
-                    title="Aadhaar Front Image" 
+                  <DocumentUploader
+                    title="Aadhaar Front Image"
 
                     documents={(selectedFarmer.documents || []).filter((d: any) => d.documentType === 'Aadhaar Front')}
                     onUpload={(file, meta) => { setUploadType('Aadhaar Front'); setDocMeta(meta as any); return handleFileUpload({ target: { files: [file] } } as any); }}
                     onDelete={async (idx) => handleDocumentDelete(idx, 'Aadhaar Front')}
                     allowMultiple={false}
                   />
-                  <DocumentUploader 
-                    title="Aadhaar Back Image" 
+                  <DocumentUploader
+                    title="Aadhaar Back Image"
 
                     documents={(selectedFarmer.documents || []).filter((d: any) => d.documentType === 'Aadhaar Back')}
                     onUpload={(file, meta) => { setUploadType('Aadhaar Back'); setDocMeta(meta as any); return handleFileUpload({ target: { files: [file] } } as any); }}
@@ -405,9 +413,9 @@ const FarmerKyc = () => {
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center"><Info className="w-4 h-4 mr-2 text-primary" /> PAN Details</h3>
                 <label className="block text-xs font-bold text-gray-500 mb-1">PAN Number</label>
                 <input type="text" name="panNumber" value={selectedFarmer.panNumber || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, panNumber: e.target.value })} placeholder="ABCDE1234F" className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary uppercase mb-4" />
-                
-                <DocumentUploader 
-                  title="PAN Card Image" 
+
+                <DocumentUploader
+                  title="PAN Card Image"
 
                   documents={(selectedFarmer.documents || []).filter((d: any) => d.documentType === 'PAN')}
                   onUpload={(file, meta) => { setUploadType('PAN'); setDocMeta(meta as any); return handleFileUpload({ target: { files: [file] } } as any); }}
@@ -427,31 +435,31 @@ const FarmerKyc = () => {
                 <h3 className="font-bold text-gray-800 border-b pb-2">Bank Account</h3>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">Account Holder Name</label>
-                  <input type="text" value={selectedFarmer.bankDetails?.accountHolder || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, accountHolder: e.target.value }})} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
+                  <input type="text" value={selectedFarmer.bankDetails?.accountHolder || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, accountHolder: e.target.value } })} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">Bank Name</label>
-                  <input type="text" value={selectedFarmer.bankDetails?.bankName || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, bankName: e.target.value }})} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
+                  <input type="text" value={selectedFarmer.bankDetails?.bankName || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, bankName: e.target.value } })} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">Branch Name</label>
-                  <input type="text" value={selectedFarmer.bankDetails?.branch || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, branch: e.target.value }})} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
+                  <input type="text" value={selectedFarmer.bankDetails?.branch || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, branch: e.target.value } })} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1">Account No.</label>
-                    <input type="text" value={selectedFarmer.bankDetails?.accountNumber || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, accountNumber: e.target.value }})} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
+                    <input type="text" value={selectedFarmer.bankDetails?.accountNumber || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, accountNumber: e.target.value } })} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1">IFSC Code</label>
-                    <input type="text" value={selectedFarmer.bankDetails?.ifsc || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, ifsc: e.target.value }})} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary uppercase" />
+                    <input type="text" value={selectedFarmer.bankDetails?.ifsc || ''} onChange={e => setSelectedFarmer({ ...selectedFarmer, bankDetails: { ...selectedFarmer.bankDetails, ifsc: e.target.value } })} className="w-full border rounded-xl p-3 text-sm focus:ring-1 focus:ring-primary uppercase" />
                   </div>
                 </div>
                 <button onClick={saveBasicInfo} className="w-full bg-primary text-white py-2 rounded-xl font-bold mt-4 shadow hover:bg-green-700">Save Bank Info</button>
               </div>
 
-              <DocumentUploader 
-                title="Passbook / Cancelled Cheque" 
+              <DocumentUploader
+                title="Passbook / Cancelled Cheque"
 
                 documents={(selectedFarmer.documents || []).filter((d: any) => d.documentType === 'Passbook')}
                 onUpload={(file, meta) => { setUploadType('Passbook'); setDocMeta(meta as any); return handleFileUpload({ target: { files: [file] } } as any); }}
@@ -480,9 +488,8 @@ const FarmerKyc = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-black text-gray-950">₹{bill.netPayable?.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
-                        <span className={`inline-block mt-1 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                          bill.paymentStatus === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'
-                        }`}>
+                        <span className={`inline-block mt-1 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${bill.paymentStatus === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'
+                          }`}>
                           {bill.paymentStatus === 'Pending' ? 'Completed' : 'Paid'}
                         </span>
                       </div>

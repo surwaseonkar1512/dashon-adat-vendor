@@ -4,10 +4,12 @@ import Dashboard from './pages/Dashboard';
 import Vendors from './pages/Vendors';
 import Commodities from './pages/Commodities';
 import Layout from './components/Layout';
+import { Toaster } from 'sonner';
 
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" richColors />
       <Routes>
         <Route path="/login" element={<Login />} />
         

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Settings, Save, CheckCircle, Store, Building2, Receipt } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateVendorProfile } from '../store/slices/authSlice';
+import { toast } from 'sonner';
 import type { RootState } from '../store/store';
 import { API_BASE } from '../config';
 import { DocumentUploader, type DocumentMetadata } from '../components/DocumentUploader';
@@ -103,18 +104,17 @@ const BusinessSettings = () => {
           address,
           gstNumber
         }));
-        setMessage('Settings saved successfully!');
-        setTimeout(() => setMessage(''), 3000);
+        toast.success('Business settings updated successfully!');
       } else {
-        alert(data.message || 'Failed to save business settings');
+        toast.error(data.message || 'Failed to save business settings');
       }
     } catch (error) {
-      alert('Network error. Failed to save.');
+      toast.error('Network error. Failed to save.');
     }
   };
 
   const handleTestPrint = () => {
-    alert(`[Simulating ${paperWidth} ESC/POS Thermal Print via ${deviceType}]\n--------------------------------\n        ${vendor?.businessName?.toUpperCase()}\n        TEST PRINT READY\n--------------------------------`);
+    toast.info(`[Simulating ${paperWidth} ESC/POS Thermal Print via ${deviceType}]\n--------------------------------\n        ${vendor?.businessName?.toUpperCase()}\n        TEST PRINT READY\n--------------------------------`);
   };
 
   return (
