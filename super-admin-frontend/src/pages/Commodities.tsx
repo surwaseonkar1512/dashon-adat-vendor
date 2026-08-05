@@ -93,7 +93,7 @@ const Commodities = () => {
         const text = event.target?.result as string;
         // Basic CSV Parsing (CSV layout: Name, MarathiName, EnglishName, Code, Category, Unit, GST, HSN)
         const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-        const headers = lines[0].split(',');
+        // const headers = lines[0].split(',');
 
         const parsedCommodities = lines.slice(1).map(line => {
           const cols = line.split(',');
