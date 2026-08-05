@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
-import { Plus, X, ShoppingCart, Calendar, ArrowLeft, Search, UserPlus, Printer, Download, Send } from 'lucide-react';
+import { Plus, X, ShoppingCart, Calendar, ArrowLeft, Search, Printer, Download, Send, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_BASE } from '../config';
 import { WeighingScaleConnector } from '../components/WeighingScaleConnector';
 import { SmartFarmerModal } from '../components/SmartFarmerModal';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 interface Farmer {
   _id: string;
@@ -93,6 +94,7 @@ const PurchaseBilling = () => {
   const [farmerSearchQuery, setFarmerSearchQuery] = useState('');
   const [isFarmerDropdownOpen, setIsFarmerDropdownOpen] = useState(false);
   const [isSmartFarmerModalOpen, setIsSmartFarmerModalOpen] = useState(false);
+  const [deleteBillId, setDeleteBillId] = useState<string | null>(null);
 
   // Form State
   const [farmerId, setFarmerId] = useState('');
@@ -211,6 +213,25 @@ const PurchaseBilling = () => {
     }
   };
 
+  const handleDeleteBill = async () => {
+    if (!deleteBillId) return;
+    try {
+      const res = await fetch(`${API_BASE}/purchases/${deleteBillId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Draft bill deleted successfully');
+        setDeleteBillId(null);
+        fetchData();
+      } else {
+        toast.error(data.message || 'Failed to delete bill');
+      }
+    } catch (err) {
+      toast.error('Network error');
+    }
+  };
+
   // Math calculations
   const calculateBill = () => {
     const baseNetWeight = Math.max(0, grossWeight - bagWeight);
@@ -256,7 +277,7 @@ const PurchaseBilling = () => {
 
     const finalNetWeight = Math.max(0, baseNetWeight - moistureDeductionWt - fmDeductionWt - brokenDeductionWt);
     const grossAmount = finalNetWeight * (selectedRate / 100); // Rate per Quintal (1 Quintal = 100 KG)
-    
+
     // Deduction fixed fees
     const hamali = 300;
     const commission = 500;
@@ -311,7 +332,7 @@ const PurchaseBilling = () => {
         status
       };
 
-      const url = editingBillId 
+      const url = editingBillId
         ? `${API_BASE}/purchases/${editingBillId}`
         : `${API_BASE}/purchases`;
       const method = editingBillId ? 'PUT' : 'POST';
@@ -385,14 +406,14 @@ const PurchaseBilling = () => {
       </div>
 
       <div className="flex bg-gray-200 p-1 rounded-xl mb-4 text-xs font-bold w-full max-w-xs mx-auto">
-        <button 
-          onClick={() => setActiveTab('Finalized')} 
+        <button
+          onClick={() => setActiveTab('Finalized')}
           className={`flex-1 py-2 rounded-lg text-center ${activeTab === 'Finalized' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'}`}
         >
           Finalized Bills
         </button>
-        <button 
-          onClick={() => setActiveTab('Draft')} 
+        <button
+          onClick={() => setActiveTab('Draft')}
           className={`flex-1 py-2 rounded-lg text-center ${activeTab === 'Draft' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'}`}
         >
           Drafts
@@ -412,8 +433,8 @@ const PurchaseBilling = () => {
             </div>
           ) : (
             bills.filter(b => b.status === activeTab).map((bill) => (
-              <div 
-                key={bill._id} 
+              <div
+                key={bill._id}
                 className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex justify-between items-center animate-fade-in cursor-pointer hover:bg-gray-50 transition"
                 onClick={() => handleViewBill(bill)}
               >
@@ -425,14 +446,24 @@ const PurchaseBilling = () => {
                   </div>
                   <p className="text-xs text-gray-600 font-medium">Weight: {bill.netWeight.toFixed(2)} KG</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end">
                   <p className="text-sm font-black text-gray-950">₹{bill.netPayable.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
-                  <span className={`inline-block mt-2 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                    bill.status === 'Draft' ? 'bg-gray-100 text-gray-700' :
-                    bill.paymentStatus === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'
-                  }`}>
-                    {bill.status === 'Draft' ? 'Draft' : (bill.paymentStatus === 'Pending' ? 'Completed' : bill.paymentStatus)}
-                  </span>
+                  <div className="flex items-center gap-2 mt-2">
+                    {bill.status === 'Draft' && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteBillId(bill._id); }}
+                        className="text-red-500 bg-red-50 p-1 rounded-md hover:bg-red-100 transition-colors"
+                        title="Delete Draft"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <span className={`inline-block text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${bill.status === 'Draft' ? 'bg-gray-100 text-gray-700' :
+                      bill.paymentStatus === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'
+                      }`}>
+                      {bill.status === 'Draft' ? 'Draft' : (bill.paymentStatus === 'Pending' ? 'Completed' : bill.paymentStatus)}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))
@@ -459,7 +490,7 @@ const PurchaseBilling = () => {
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     {/* Searchable Dropdown Trigger */}
-                    <div 
+                    <div
                       className="w-full border rounded-xl p-3 text-sm bg-white border-gray-200 flex justify-between items-center cursor-pointer"
                       onClick={() => setIsFarmerDropdownOpen(!isFarmerDropdownOpen)}
                     >
@@ -473,23 +504,23 @@ const PurchaseBilling = () => {
                     {isFarmerDropdownOpen && (
                       <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-hidden flex flex-col">
                         <div className="p-2 border-b">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             autoFocus
                             value={farmerSearchQuery}
                             onChange={(e) => setFarmerSearchQuery(e.target.value)}
-                            placeholder="Search name, mobile, village..." 
+                            placeholder="Search name, mobile, village..."
                             className="w-full bg-gray-50 border-none rounded-lg p-2 text-sm focus:ring-0"
                           />
                         </div>
                         <div className="overflow-y-auto flex-1">
-                          {farmers.filter(f => 
-                            f.name.toLowerCase().includes(farmerSearchQuery.toLowerCase()) || 
-                            f.mobile.includes(farmerSearchQuery) || 
+                          {farmers.filter(f =>
+                            f.name.toLowerCase().includes(farmerSearchQuery.toLowerCase()) ||
+                            f.mobile.includes(farmerSearchQuery) ||
                             f.village.toLowerCase().includes(farmerSearchQuery.toLowerCase())
                           ).map(f => (
-                            <div 
-                              key={f._id} 
+                            <div
+                              key={f._id}
                               className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-0"
                               onClick={() => {
                                 setFarmerId(f._id);
@@ -505,7 +536,7 @@ const PurchaseBilling = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Add New Farmer Button */}
                   <button
                     type="button"
@@ -626,7 +657,7 @@ const PurchaseBilling = () => {
       {showPrintModal && lastSavedBill && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col max-h-[85vh] text-xs">
-            
+
             {/* Modal Title */}
             <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
               <h3 className="font-black text-gray-900">Receipt Generated</h3>
@@ -690,7 +721,7 @@ const PurchaseBilling = () => {
               ) : (
                 <div className="bg-white p-4 shadow-xs border text-left space-y-3 font-sans text-[10px] text-gray-700">
                   <div className="text-center font-bold text-sm border-b pb-2 uppercase tracking-wide">ADAT - Purchase Invoice</div>
-                  
+
                   <div className="grid grid-cols-2 gap-2 border-b pb-2 text-[9px]">
                     <div>
                       {vendor?.logo && (
@@ -775,7 +806,7 @@ const PurchaseBilling = () => {
       {viewingBill && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col">
-            
+
             {/* Header */}
             <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
               <div>
@@ -789,7 +820,7 @@ const PurchaseBilling = () => {
 
             {/* Content */}
             <div className="p-4 overflow-y-auto space-y-6 text-left">
-              
+
               {/* Status Badges */}
               <div className="flex gap-2">
                 <span className={`text-xs font-bold px-2 py-1 rounded ${viewingBill.status === 'Draft' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
@@ -836,14 +867,14 @@ const PurchaseBilling = () => {
                     <span className="text-gray-600">Base Rate</span>
                     <span className="font-medium text-gray-900">₹{viewingBill.rate || 0}/Q</span>
                   </div>
-                  
+
                   {viewingBill.deductionsApplied?.map((d: any, idx: number) => (
                     <div key={idx} className="flex justify-between text-sm text-red-500">
                       <span>{d.name} ({d.value}{d.type === 'Weight' ? 'KG' : '%'})</span>
                       <span>-₹{d.amount.toFixed(2)}</span>
                     </div>
                   ))}
-                  
+
                   <div className="flex justify-between text-sm font-medium pt-2 border-t mt-2">
                     <span className="text-gray-600">Total Amount</span>
                     <span>₹{viewingBill.totalAmount?.toLocaleString('en-IN', { maximumFractionDigits: 2 }) || viewingBill.netPayable.toLocaleString()}</span>
@@ -890,7 +921,7 @@ const PurchaseBilling = () => {
                 <span className="text-sm text-gray-600 font-bold">Net Payable</span>
                 <span className="text-2xl font-black text-primary">₹{viewingBill.netPayable.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               </div>
-              
+
               {viewingBill.status === 'Draft' ? (
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -916,7 +947,7 @@ const PurchaseBilling = () => {
                 </button>
               )}
             </div>
-            
+
           </div>
         </div>
       )}
@@ -933,6 +964,16 @@ const PurchaseBilling = () => {
           setIsSmartFarmerModalOpen(false);
           setFarmerSearchQuery('');
         }}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteBillId}
+        title="Delete Draft Bill"
+        message="Are you sure you want to delete this draft bill? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDeleteBill}
+        onCancel={() => setDeleteBillId(null)}
+        isDestructive={true}
       />
     </div>
   );

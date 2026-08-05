@@ -104,3 +104,15 @@ export const getSalesBills = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const deleteSalesBill = async (req: Request, res: Response) => {
+  try {
+    const bill = await SalesBill.findById(req.params.id);
+    if (!bill) return res.status(404).json({ success: false, message: 'Bill not found' });
+    if (bill.status === 'Finalized') return res.status(400).json({ success: false, message: 'Cannot delete finalized bills' });
+    await SalesBill.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Bill deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error deleting bill', error: error.message });
+  }
+};

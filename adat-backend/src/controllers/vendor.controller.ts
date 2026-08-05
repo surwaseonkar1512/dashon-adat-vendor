@@ -423,3 +423,33 @@ export const getVendorDashboardSummary = async (req: Request, res: Response) => 
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const deletePurchaseBill = async (req: Request, res: Response) => {
+  try {
+    const bill = await Purchase.findById(req.params.id);
+    if (!bill) return res.status(404).json({ success: false, message: 'Bill not found' });
+    if (bill.status === 'Finalized') return res.status(400).json({ success: false, message: 'Cannot delete finalized bills' });
+    await Purchase.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Bill deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error deleting bill', error: error.message });
+  }
+};
+
+export const deleteFarmer = async (req: Request, res: Response) => {
+  try {
+    const farmerId = req.params.id;
+    // Check if farmer has finalized bills
+    const bills = await Purchase.find({ farmerId, status: 'Finalized' });
+    if (bills.length > 0) {
+      return res.status(400).json({ success: false, message: 'Cannot delete farmer with finalized bills.' });
+    }
+    // Delete draft bills associated with farmer
+    await Purchase.deleteMany({ farmerId, status: 'Draft' });
+    // Delete farmer
+    await Farmer.findByIdAndDelete(farmerId);
+    res.json({ success: true, message: 'Farmer deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error deleting farmer', error: error.message });
+  }
+};

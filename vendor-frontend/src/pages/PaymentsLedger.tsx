@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
-import { Plus, Calendar, ArrowLeft, CreditCard, X } from 'lucide-react';
+import { Plus, Calendar, ArrowLeft, CreditCard, X, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { ConfirmModal } from '../components/ConfirmModal';
 import { API_BASE } from '../config';
 
 interface Farmer {
@@ -40,6 +42,7 @@ const PaymentsLedger = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [deleteCustomerId, setDeleteCustomerId] = useState<string | null>(null);
 
   // Payment Form State
   const [payAmount, setPayAmount] = useState<number>(1000);
@@ -133,6 +136,28 @@ const PaymentsLedger = () => {
     if (type === 'Customer' && customers.length > 0) setSelectedPartyId(customers[0]._id);
   };
 
+  const handleDeleteCustomer = async () => {
+    if (!deleteCustomerId) return;
+    try {
+      const res = await fetch(`${API_BASE}/customers/${deleteCustomerId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Customer deleted successfully');
+        setDeleteCustomerId(null);
+        setSelectedPartyId('');
+        fetchData();
+      } else {
+        toast.error(data.message || 'Failed to delete customer');
+        setDeleteCustomerId(null);
+      }
+    } catch (err) {
+      toast.error('Network error while deleting customer');
+      setDeleteCustomerId(null);
+    }
+  };
+
   return (
     <div className="px-4 py-6 max-w-md mx-auto min-h-screen bg-gray-50 pb-20 text-left">
       <div className="flex justify-between items-center mb-6">
@@ -175,17 +200,28 @@ const PaymentsLedger = () => {
 
       <div>
         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Select {partyType}</label>
-        <select
-          value={selectedPartyId}
-          onChange={(e) => setSelectedPartyId(e.target.value)}
-          className="w-full border rounded-xl p-3 text-sm bg-white border-gray-200 mb-6"
-        >
-          <option value="">-- Choose Party --</option>
-          {partyType === 'Customer' 
-            ? customers.map(c => <option key={c._id} value={c._id}>{c.name} (Outstanding: ₹{c.outstandingBalance})</option>)
-            : farmers.map(f => <option key={f._id} value={f._id}>{f.name}</option>)
-          }
-        </select>
+        <div className="flex items-center gap-2 mb-6">
+          <select
+            value={selectedPartyId}
+            onChange={(e) => setSelectedPartyId(e.target.value)}
+            className="w-full border rounded-xl p-3 text-sm bg-white border-gray-200"
+          >
+            <option value="">-- Choose Party --</option>
+            {partyType === 'Customer' 
+              ? customers.map(c => <option key={c._id} value={c._id}>{c.name} (Outstanding: ₹{c.outstandingBalance})</option>)
+              : farmers.map(f => <option key={f._id} value={f._id}>{f.name}</option>)
+            }
+          </select>
+          {partyType === 'Customer' && selectedPartyId && (
+            <button
+              onClick={() => setDeleteCustomerId(selectedPartyId)}
+              className="p-3 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-colors shrink-0 border border-red-100"
+              title="Delete Customer"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Ledger History List */}
@@ -257,6 +293,16 @@ const PaymentsLedger = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteCustomerId}
+        title="Delete Customer"
+        message="Are you sure you want to delete this customer? Customers with outstanding balances cannot be deleted."
+        confirmText="Delete Customer"
+        onConfirm={handleDeleteCustomer}
+        onCancel={() => setDeleteCustomerId(null)}
+        isDestructive={true}
+      />
     </div>
   );
 };

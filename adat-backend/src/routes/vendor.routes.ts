@@ -14,11 +14,13 @@ import {
   createPurchaseBill,
   getPurchases,
   updatePurchaseBill,
+  deletePurchaseBill,
+  deleteFarmer,
   getVendorDashboardSummary
 } from '../controllers/vendor.controller';
-import { createSalesBill, getSalesBills } from '../controllers/sales.controller';
+import { createSalesBill, getSalesBills, deleteSalesBill } from '../controllers/sales.controller';
 import { createWarehouse, getWarehouses, getStockSummary, transferStock, adjustStock } from '../controllers/stock.controller';
-import { createCustomer, getCustomers, payFarmer, collectCustomerPayment, getLedgerHistory } from '../controllers/ledger.controller';
+import { createCustomer, getCustomers, payFarmer, collectCustomerPayment, getLedgerHistory, deleteCustomer } from '../controllers/ledger.controller';
 import { upload, uploadFile } from '../controllers/upload.controller';
 
 const router = Router();
@@ -37,15 +39,18 @@ router.post('/farmers', createFarmer);
 router.get('/farmers', getFarmers);
 router.get('/farmers/:id', getFarmerProfile);
 router.put('/farmers/:id', updateFarmer);
+router.delete('/farmers/:id', deleteFarmer);
 
 // Purchases Billing
 router.post('/purchases', createPurchaseBill);
 router.get('/purchases', getPurchases);
 router.put('/purchases/:id', updatePurchaseBill);
+router.delete('/purchases/:id', deletePurchaseBill);
 
 // Sales Billing
 router.post('/sales', createSalesBill);
 router.get('/sales', getSalesBills);
+router.delete('/sales/:id', deleteSalesBill);
 
 // Stock & Warehouses
 router.post('/warehouses', createWarehouse);
@@ -57,6 +62,7 @@ router.post('/stock/adjust', adjustStock);
 // Ledger & Collections
 router.post('/customers', createCustomer);
 router.get('/customers', getCustomers);
+router.delete('/customers/:id', deleteCustomer);
 router.post('/payments/farmer', payFarmer);
 router.post('/payments/customer', collectCustomerPayment);
 router.get('/ledgers', getLedgerHistory);

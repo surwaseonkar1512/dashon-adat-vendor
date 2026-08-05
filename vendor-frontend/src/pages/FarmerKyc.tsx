@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
-import { ArrowLeft, Shield, CheckCircle, Info, Search, Clock, Plus } from 'lucide-react';
+import { ArrowLeft, Shield, CheckCircle, Info, Search, Clock, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_BASE } from '../config';
 import { FarmerStepper } from '../components/FarmerStepper';
 import { DocumentUploader } from '../components/DocumentUploader';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 interface DocumentMetadata {
   _id?: string;
@@ -53,6 +54,7 @@ const FarmerKyc = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteFarmerId, setDeleteFarmerId] = useState<string | null>(null);
 
   // Selected Farmer CRM State
   const [selectedFarmer, setSelectedFarmer] = useState<Farmer | null>(null);
@@ -290,6 +292,28 @@ const FarmerKyc = () => {
     }
   };
 
+  const handleDeleteFarmer = async () => {
+    if (!deleteFarmerId) return;
+    try {
+      const res = await fetch(`${API_BASE}/farmers/${deleteFarmerId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Farmer deleted successfully');
+        setDeleteFarmerId(null);
+        setSelectedFarmer(null);
+        fetchFarmers();
+      } else {
+        toast.error(data.message || 'Failed to delete farmer');
+        setDeleteFarmerId(null);
+      }
+    } catch (err) {
+      toast.error('Network error while deleting farmer');
+      setDeleteFarmerId(null);
+    }
+  };
+
   if (selectedFarmer) {
     return (
       <div className="min-h-screen bg-gray-50 pb-20">
@@ -302,7 +326,16 @@ const FarmerKyc = () => {
             <h1 className="text-lg font-bold text-gray-900">{selectedFarmer.name}</h1>
             <p className="text-xs text-gray-500">{selectedFarmer.mobile} • {selectedFarmer.village}</p>
           </div>
-          <div>{getKycBadge(selectedFarmer.kycStatus || 'Basic')}</div>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => setDeleteFarmerId(selectedFarmer._id)}
+              className="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
+              title="Delete Farmer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            {getKycBadge(selectedFarmer.kycStatus || 'Basic')}
+          </div>
         </div>
 
         {/* Tabs */}
@@ -631,6 +664,16 @@ const FarmerKyc = () => {
           }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteFarmerId}
+        title="Delete Farmer"
+        message="Are you sure you want to delete this farmer? All associated draft bills will also be deleted. Finalized bills will block deletion."
+        confirmText="Delete Farmer"
+        onConfirm={handleDeleteFarmer}
+        onCancel={() => setDeleteFarmerId(null)}
+        isDestructive={true}
+      />
     </div>
   );
 };

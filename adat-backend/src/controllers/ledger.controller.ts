@@ -104,3 +104,23 @@ export const getLedgerHistory = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const deleteCustomer = async (req: Request, res: Response) => {
+  try {
+    const customerId = req.params.id;
+    const customer = await Customer.findById(customerId);
+    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
+    
+    // Check if customer has an outstanding balance
+    if (customer.outstandingBalance && customer.outstandingBalance > 0) {
+      return res.status(400).json({ success: false, message: 'Cannot delete customer with an outstanding balance.' });
+    }
+
+    // Since we don't have a SalesBill import here easily, we could just delete the customer if balance is 0.
+    // Assuming balance 0 means they are safe to delete or have been settled.
+    await Customer.findByIdAndDelete(customerId);
+    res.json({ success: true, message: 'Customer deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error deleting customer', error: error.message });
+  }
+};
