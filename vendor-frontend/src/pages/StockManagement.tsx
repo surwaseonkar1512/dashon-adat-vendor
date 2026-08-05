@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
-import { Archive, ArrowLeft, Plus, Settings } from 'lucide-react';
+import { Archive, ArrowLeft, Plus, Settings, MapPin, X } from 'lucide-react';
 import { API_BASE } from '../config';
 
 interface Warehouse {
@@ -179,7 +179,7 @@ const StockManagement = () => {
           {warehouses.map(w => (
             <div key={w._id} className="border rounded-xl p-3 bg-gray-50/50">
               <h4 className="font-bold text-gray-900 text-xs">{w.name}</h4>
-              <p className="text-[10px] text-gray-500 mt-1">📍 {w.location}</p>
+              <p className="text-[10px] text-gray-500 mt-1 flex items-center"><MapPin className="h-3 w-3 mr-1 inline" /> {w.location}</p>
               <span className="inline-block mt-2 text-[9px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full">{w.capacity}</span>
             </div>
           ))}
@@ -215,7 +215,7 @@ const StockManagement = () => {
               <h2 className="text-base font-bold text-gray-900 flex items-center">
                 <Archive className="h-5 w-5 text-primary mr-1.5" /> Add Warehouse
               </h2>
-              <button onClick={() => setIsWHModalOpen(false)} className="text-gray-500">✕</button>
+              <button onClick={() => setIsWHModalOpen(false)} className="text-gray-500"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handleCreateWarehouse} className="space-y-3 text-xs">
               <div>
@@ -246,7 +246,7 @@ const StockManagement = () => {
               <h2 className="text-base font-bold text-gray-900 flex items-center">
                 <Settings className="h-5 w-5 text-primary mr-1.5" /> Adjust Inventory
               </h2>
-              <button onClick={() => setIsAdjustmentModalOpen(false)} className="text-gray-500">✕</button>
+              <button onClick={() => setIsAdjustmentModalOpen(false)} className="text-gray-500"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handleCreateAdjustment} className="space-y-3 text-xs text-left">
               <div>

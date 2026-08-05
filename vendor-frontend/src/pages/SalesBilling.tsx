@@ -358,7 +358,7 @@ const SalesBilling = () => {
               <h2 className="text-base font-bold text-gray-900 flex items-center">
                 <User className="h-5 w-5 text-primary mr-1.5" /> Add Customer
               </h2>
-              <button onClick={() => setIsCustomerModalOpen(false)} className="text-gray-500">✕</button>
+              <button onClick={() => setIsCustomerModalOpen(false)} className="text-gray-500"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handleCreateCustomer} className="space-y-3 text-xs">
               <div>
@@ -392,7 +392,7 @@ const SalesBilling = () => {
             {/* Modal Title */}
             <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
               <h3 className="font-black text-gray-900">Invoice Generated</h3>
-              <button onClick={() => setShowPrintModal(false)} className="text-gray-500 font-bold">✕</button>
+              <button onClick={() => setShowPrintModal(false)} className="text-gray-500 font-bold"><X className="h-5 w-5" /></button>
             </div>
 
             {/* Layout Mode Selector */}

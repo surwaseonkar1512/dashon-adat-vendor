@@ -622,7 +622,7 @@ const PurchaseBilling = () => {
             {/* Modal Title */}
             <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
               <h3 className="font-black text-gray-900">Receipt Generated</h3>
-              <button onClick={() => setShowPrintModal(false)} className="text-gray-500 font-bold">✕</button>
+              <button onClick={() => setShowPrintModal(false)} className="text-gray-500 font-bold"><X className="h-5 w-5" /></button>
             </div>
 
             {/* Layout Mode Selector */}

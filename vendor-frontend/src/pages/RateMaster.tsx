@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
-import { TrendingUp, Save, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { TrendingUp, Save, CheckCircle, AlertCircle, ArrowLeft, MapPin } from 'lucide-react';
 import { API_BASE } from '../config';
 
 interface Commodity {
@@ -146,7 +146,7 @@ const RateMaster = () => {
               <div key={r._id} className="p-4 flex justify-between items-center text-xs">
                 <div>
                   <h4 className="font-bold text-gray-950 text-sm">{(r.commodityId as any)?.englishName || 'Commodity'}</h4>
-                  <span className="text-gray-400 font-medium">📍 {r.marketName}</span>
+                  <span className="text-gray-400 font-medium flex items-center"><MapPin className="h-3 w-3 mr-1 inline" /> {r.marketName}</span>
                 </div>
                 <div className="text-right">
                   <p className="font-black text-primary text-sm">Buy: ₹{r.purchaseRate}/Q</p>

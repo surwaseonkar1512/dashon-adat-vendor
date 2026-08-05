@@ -4,7 +4,7 @@ import { logout } from '../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { 
   Menu, Bell, Plus, FileText, ShoppingCart, Archive, 
-  TrendingUp, DollarSign, User, LogOut, Truck, Settings, Users, CreditCard 
+  TrendingUp, DollarSign, User, LogOut, Truck, Settings, Users, CreditCard, X 
 } from 'lucide-react';
 import type { RootState } from '../store/store';
 import { API_BASE } from '../config';
@@ -170,7 +170,7 @@ const Dashboard = () => {
             <div>
               <div className="flex justify-between items-center pb-4 border-b border-gray-100">
                 <span className="text-lg font-bold text-primary font-sans">ADAT ERP</span>
-                <button onClick={() => setIsDrawerOpen(false)} className="text-gray-500 font-bold text-sm">✕</button>
+                <button onClick={() => setIsDrawerOpen(false)} className="text-gray-500 font-bold text-sm"><X className="h-5 w-5" /></button>
               </div>
               <nav className="mt-6 space-y-1">
                 <button onClick={() => { setIsDrawerOpen(false); navigate('/farmers'); }} className="w-full flex items-center p-2.5 rounded-xl hover:bg-gray-50 text-xs font-semibold text-gray-700">

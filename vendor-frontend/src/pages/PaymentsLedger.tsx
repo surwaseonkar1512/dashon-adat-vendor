@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
-import { Plus, Calendar, ArrowLeft, CreditCard } from 'lucide-react';
+import { Plus, Calendar, ArrowLeft, CreditCard, X } from 'lucide-react';
 import { API_BASE } from '../config';
 
 interface Farmer {
@@ -224,7 +224,7 @@ const PaymentsLedger = () => {
               <h2 className="text-base font-bold text-gray-900 flex items-center">
                 <CreditCard className="h-5 w-5 text-primary mr-1.5" /> Post Settlement
               </h2>
-              <button onClick={() => setIsPaymentModalOpen(false)} className="text-gray-500">✕</button>
+              <button onClick={() => setIsPaymentModalOpen(false)} className="text-gray-500"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handlePostPayment} className="space-y-3 text-xs text-left">
               <div>
