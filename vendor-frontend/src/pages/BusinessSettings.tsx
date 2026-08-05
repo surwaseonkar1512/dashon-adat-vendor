@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Settings, Save, CheckCircle, Store, Building2, Receipt } from 'lucide-react';
+import { ArrowLeft, Settings, Save, Store, Building2, Receipt } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateVendorProfile } from '../store/slices/authSlice';
 import { toast } from 'sonner';
@@ -26,7 +26,7 @@ const BusinessSettings = () => {
   const [autoShareWhatsApp, setAutoShareWhatsApp] = useState(false);
   const [askBeforePrint, setAskBeforePrint] = useState(true);
 
-  const [message, setMessage] = useState('');
+
 
   // Load configured settings
   useEffect(() => {
@@ -53,10 +53,10 @@ const BusinessSettings = () => {
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData,
     });
-    
+
     if (!response.ok) throw new Error('Upload failed');
     const data = await response.json();
-    
+
     setLogoDocs([{ documentType: 'Logo', url: data.data.url }]);
   };
 
@@ -66,7 +66,7 @@ const BusinessSettings = () => {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Save Printer Settings
     const config = {
       deviceType,
@@ -127,18 +127,18 @@ const BusinessSettings = () => {
         <h1 className="text-xl font-bold text-gray-950 font-sans">Business & Settings</h1>
       </div>
 
-      {message && (
+      {/* {message && (
         <div className="mb-4 bg-green-50 border-l-4 border-green-400 p-3 rounded flex items-center text-xs text-green-700">
           <CheckCircle className="h-4 w-4 mr-2" /> {message}
         </div>
-      )}
+      )} */}
 
       <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
-        
+
         {/* Business Settings */}
         <div className="bg-white rounded-2xl p-4 border shadow-sm space-y-4">
-          <h3 className="font-bold text-primary uppercase flex items-center"><Store className="w-4 h-4 mr-2"/> Business Profile</h3>
-          
+          <h3 className="font-bold text-primary uppercase flex items-center"><Store className="w-4 h-4 mr-2" /> Business Profile</h3>
+
           <DocumentUploader
             title="Business Logo"
             documents={logoDocs}
@@ -148,7 +148,7 @@ const BusinessSettings = () => {
           />
 
           <div>
-            <label className="block text-gray-500 font-semibold mb-1 flex items-center"><Building2 className="w-3 h-3 mr-1"/> Business Address</label>
+            <label className="block text-gray-500 font-semibold mb-1 flex items-center"><Building2 className="w-3 h-3 mr-1" /> Business Address</label>
             <textarea
               value={address}
               onChange={(e) => setAddress(e.target.value)}
@@ -159,7 +159,7 @@ const BusinessSettings = () => {
           </div>
 
           <div>
-            <label className="block text-gray-500 font-semibold mb-1 flex items-center"><Receipt className="w-3 h-3 mr-1"/> GST Number (Optional)</label>
+            <label className="block text-gray-500 font-semibold mb-1 flex items-center"><Receipt className="w-3 h-3 mr-1" /> GST Number (Optional)</label>
             <input
               type="text"
               value={gstNumber}
