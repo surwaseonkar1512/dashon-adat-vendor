@@ -59,6 +59,14 @@ const FarmerKyc = () => {
   const [farmerPurchases, setFarmerPurchases] = useState<any[]>([]);
   const [farmerLedgers, setFarmerLedgers] = useState<any[]>([]);
 
+  // Automatically scroll tab bar to active tab
+  useEffect(() => {
+    const el = document.getElementById(`tab-${activeTab}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [activeTab]);
+
   // Touch Swipe State
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -290,10 +298,11 @@ const FarmerKyc = () => {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white border-b flex overflow-x-auto hide-scrollbar">
+        <div className="bg-white border-b flex overflow-x-auto hide-scrollbar scroll-smooth">
           {tabs.map(tab => (
             <button
               key={tab}
+              id={`tab-${tab}`}
               onClick={() => setActiveTab(tab)}
               className={`whitespace-nowrap px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
