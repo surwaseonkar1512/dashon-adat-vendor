@@ -142,11 +142,15 @@ const PaymentsLedger = () => {
           </button>
           <h1 className="text-xl font-bold text-gray-950">Payments & Ledgers</h1>
         </div>
+      </div>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-20 left-0 right-0 flex justify-center z-20 pointer-events-none">
         <button
           onClick={() => setIsPaymentModalOpen(true)}
-          className="bg-primary hover:bg-green-700 text-white text-xs font-bold py-2 px-3 rounded-xl flex items-center shadow"
+          className="bg-primary hover:bg-green-700 text-white text-sm font-bold py-3 px-6 rounded-full shadow-lg pointer-events-auto flex items-center"
         >
-          <Plus className="h-4 w-4 mr-1" /> New Entry
+          <Plus className="h-5 w-5 mr-2" /> New Entry
         </button>
       </div>
 

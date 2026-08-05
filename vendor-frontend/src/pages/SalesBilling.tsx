@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
-import { X, Calendar, ArrowLeft, ShoppingCart, User, Printer, Download, Send } from 'lucide-react';
+import { X, Calendar, ArrowLeft, ShoppingCart, User, Printer, Download, Send, Plus } from 'lucide-react';
 import { API_BASE } from '../config';
 
 interface Customer {
@@ -81,7 +81,7 @@ const SalesBilling = () => {
       if (custData.success) setCustomers(custData.data);
       if (comData.success) setCommodities(comData.data);
       if (whData.success) setWarehouses(whData.data);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   useEffect(() => {
@@ -196,20 +196,22 @@ const SalesBilling = () => {
           </button>
           <h1 className="text-xl font-bold text-gray-950">Sales Billing</h1>
         </div>
-        <div className="flex space-x-1.5">
-          <button
-            onClick={() => setIsCustomerModalOpen(true)}
-            className="bg-white border text-gray-700 text-xs font-bold py-2 px-3 rounded-xl shadow-xs"
-          >
-            + Customer
-          </button>
-          <button
-            onClick={() => setIsInvoiceModalOpen(true)}
-            className="bg-primary hover:bg-green-700 text-white text-xs font-bold py-2 px-3 rounded-xl flex items-center shadow"
-          >
-            + Invoice
-          </button>
-        </div>
+      </div>
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-20 left-0 right-0 flex justify-center space-x-3 z-20 pointer-events-none">
+        <button
+          onClick={() => setIsCustomerModalOpen(true)}
+          className="bg-white border border-gray-200 text-gray-700 text-sm font-bold py-3 px-5 rounded-full shadow-lg pointer-events-auto flex items-center"
+        >
+          <Plus className="h-5 w-5 mr-1" /> Customer
+        </button>
+        <button
+          onClick={() => setIsInvoiceModalOpen(true)}
+          className="bg-primary hover:bg-green-700 text-white text-sm font-bold py-3 px-5 rounded-full shadow-lg pointer-events-auto flex items-center"
+        >
+          <Plus className="h-5 w-5 mr-1" /> Invoice
+        </button>
       </div>
 
       {success && <div className="bg-green-50 border-l-4 border-green-500 p-3 mb-4 rounded text-xs text-green-700">{success}</div>}
@@ -234,9 +236,8 @@ const SalesBilling = () => {
               </div>
               <div className="text-right">
                 <p className="text-sm font-black text-gray-950">₹{inv.grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
-                <span className={`inline-block mt-2 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                  inv.paymentStatus === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
-                }`}>
+                <span className={`inline-block mt-2 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${inv.paymentStatus === 'Paid' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
+                  }`}>
                   {inv.paymentStatus}
                 </span>
               </div>
@@ -387,7 +388,7 @@ const SalesBilling = () => {
       {showPrintModal && lastSavedInvoice && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col max-h-[85vh] text-xs">
-            
+
             {/* Modal Title */}
             <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
               <h3 className="font-black text-gray-900">Invoice Generated</h3>
@@ -436,7 +437,7 @@ const SalesBilling = () => {
               ) : (
                 <div className="bg-white p-4 shadow-xs border text-left space-y-3 font-sans text-[10px] text-gray-700">
                   <div className="text-center font-bold text-sm border-b pb-2 uppercase tracking-wide">ADAT - Tax Invoice</div>
-                  
+
                   <div className="grid grid-cols-2 gap-2 border-b pb-2 text-[9px]">
                     <div>
                       <p className="font-bold text-gray-900">Vendor Detail</p>

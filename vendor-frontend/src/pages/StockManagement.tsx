@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
-import { Archive, ArrowLeft, Settings } from 'lucide-react';
+import { Archive, ArrowLeft, Plus, Settings } from 'lucide-react';
 import { API_BASE } from '../config';
 
 interface Warehouse {
@@ -69,7 +69,7 @@ const StockManagement = () => {
         if (comData.data.length > 0) setSelectedCommId(comData.data[0]._id);
       }
       if (whData.data && whData.data.length > 0) setSelectedWHId(whData.data[0]._id);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   useEffect(() => {
@@ -151,20 +151,22 @@ const StockManagement = () => {
           </button>
           <h1 className="text-xl font-bold text-gray-950">Stock Management</h1>
         </div>
-        <div className="flex space-x-1.5">
-          <button
-            onClick={() => setIsWHModalOpen(true)}
-            className="bg-white border text-gray-700 text-xs font-bold py-2 px-3 rounded-xl shadow-xs"
-          >
-            + WH
-          </button>
-          <button
-            onClick={() => setIsAdjustmentModalOpen(true)}
-            className="bg-primary hover:bg-green-700 text-white text-xs font-bold py-2 px-3 rounded-xl flex items-center shadow"
-          >
-            <Settings className="h-4 w-4 mr-1" /> Adjust
-          </button>
-        </div>
+      </div>
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-20 left-0 right-0 flex justify-center space-x-3 z-20 pointer-events-none">
+        <button
+          onClick={() => setIsWHModalOpen(true)}
+          className="bg-white border border-gray-200 text-gray-700 text-sm font-bold py-3 px-5 rounded-full shadow-lg pointer-events-auto flex items-center"
+        >
+          <Plus className="h-5 w-5 mr-1" /> WH
+        </button>
+        <button
+          onClick={() => setIsAdjustmentModalOpen(true)}
+          className="bg-primary hover:bg-green-700 text-white text-sm font-bold py-3 px-5 rounded-full shadow-lg pointer-events-auto flex items-center"
+        >
+          <Settings className="h-5 w-5 mr-1" /> Adjust
+        </button>
       </div>
 
       {success && <div className="bg-green-50 border-l-4 border-green-500 p-3 mb-4 rounded text-xs text-green-700">{success}</div>}

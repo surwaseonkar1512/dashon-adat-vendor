@@ -308,14 +308,18 @@ const PurchaseBilling = () => {
           </button>
           <h1 className="text-xl font-bold text-gray-950">Purchase Billing</h1>
         </div>
+      </div>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-20 left-0 right-0 flex justify-center z-20 pointer-events-none">
         <button
           onClick={() => {
             setEditingBillId(null);
             setIsModalOpen(true);
           }}
-          className="bg-primary hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded-xl flex items-center shadow"
+          className="bg-primary hover:bg-green-700 text-white text-sm font-bold py-3 px-6 rounded-full flex items-center shadow-lg pointer-events-auto"
         >
-          <Plus className="h-4 w-4 mr-1" /> New Bill
+          <Plus className="h-5 w-5 mr-2" /> New Bill
         </button>
       </div>
 
