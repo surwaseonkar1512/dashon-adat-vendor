@@ -25,8 +25,15 @@ interface SalesInvoice {
   invoiceNumber: string;
   customerId: Customer;
   commodityId: Commodity;
+  warehouseId?: Warehouse;
+  lotNumber?: string;
   quantity: number;
   rate: number;
+  discount?: number;
+  gstPercent: number;
+  gstAmount: number;
+  loadingCharge?: number;
+  transportCharge?: number;
   grandTotal: number;
   paymentStatus: string;
   createdAt: string;
@@ -42,6 +49,11 @@ const SalesBilling = () => {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Detail View State
+  const [viewingInvoice, setViewingInvoice] = useState<SalesInvoice | null>(null);
+  const [paymentDetails, setPaymentDetails] = useState<any | null>(null);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   // Sales Invoice Form State
   const [customerId, setCustomerId] = useState('');
@@ -124,6 +136,46 @@ const SalesBilling = () => {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [lastSavedInvoice, setLastSavedInvoice] = useState<any>(null);
   const [printTab, setPrintTab] = useState<'Thermal' | 'A4'>('Thermal');
+
+  const handleViewInvoice = async (invoice: SalesInvoice) => {
+    setViewingInvoice(invoice);
+    setPaymentDetails(null);
+    if (invoice.paymentStatus === 'Paid') {
+      try {
+        const res = await fetch(`${API_BASE}/ledgers?tenantId=${vendor?.tenantId}&partyId=${invoice.customerId._id}`);
+        const data = await res.json();
+        if (data.success && data.data.length > 0) {
+          // Find the most recent receipt or matching reference
+          const payment = data.data.find((e: any) => e.entryType === 'Credit' && e.paymentMode) || data.data[0];
+          setPaymentDetails(payment);
+        }
+      } catch (err) {
+        console.error('Failed to fetch payment details', err);
+      }
+    }
+  };
+
+  const handleFinalizeDraft = async (invoiceId: string) => {
+    setIsFinalizing(true);
+    try {
+      const res = await fetch(`${API_BASE}/sales/${invoiceId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus: 'Pending' }) // Move from Draft to Pending
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchData();
+        setViewingInvoice(null);
+      } else {
+        alert(data.message || 'Failed to finalize draft');
+      }
+    } catch (err) {
+      alert('Error finalizing draft');
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
 
   const handleCreateInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,7 +277,11 @@ const SalesBilling = () => {
           </div>
         ) : (
           invoices.map((inv) => (
-            <div key={inv._id} className="bg-white rounded-2xl p-4 shadow-xs border border-gray-100 flex justify-between items-center">
+            <div 
+              key={inv._id} 
+              className="bg-white rounded-2xl p-4 shadow-xs border border-gray-100 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition"
+              onClick={() => handleViewInvoice(inv)}
+            >
               <div>
                 <h3 className="font-bold text-gray-900 text-sm">{inv.customerId?.name}</h3>
                 <span className="text-[10px] text-gray-400 font-bold block uppercase tracking-wider">{inv.commodityId?.englishName}</span>
@@ -515,6 +571,163 @@ const SalesBilling = () => {
           </div>
         </div>
       )}
+      {/* Invoice Details Modal */}
+      {viewingInvoice && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col">
+            
+            {/* Header */}
+            <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+              <div>
+                <h3 className="font-black text-gray-900 text-lg">Inv {viewingInvoice.invoiceNumber}</h3>
+                <p className="text-xs text-gray-500">{new Date(viewingInvoice.createdAt).toLocaleString()}</p>
+              </div>
+              <button onClick={() => setViewingInvoice(null)} className="text-gray-500 hover:text-gray-900">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 overflow-y-auto space-y-6 text-left">
+              
+              {/* Status Badges */}
+              <div className="flex gap-2">
+                <span className={`text-xs font-bold px-2 py-1 rounded ${viewingInvoice.paymentStatus === 'Draft' ? 'bg-orange-100 text-orange-800' : (viewingInvoice.paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800')}`}>
+                  {viewingInvoice.paymentStatus === 'Draft' ? 'Draft' : `Payment: ${viewingInvoice.paymentStatus}`}
+                </span>
+              </div>
+
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-gray-400">Customer</p>
+                  <p className="font-semibold text-gray-900">{viewingInvoice.customerId?.name}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-gray-400">Commodity</p>
+                  <p className="font-semibold text-gray-900">{viewingInvoice.commodityId?.englishName}</p>
+                </div>
+                {viewingInvoice.warehouseId && (
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-gray-400">Warehouse</p>
+                    <p className="font-semibold text-gray-900">{viewingInvoice.warehouseId.name}</p>
+                  </div>
+                )}
+                {viewingInvoice.lotNumber && (
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-gray-400">Lot #</p>
+                    <p className="font-semibold text-gray-900">{viewingInvoice.lotNumber}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Quantities & Pricing */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Pricing & Details</p>
+                <div className="space-y-2 bg-gray-50 p-3 rounded-xl border">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Quantity</span>
+                    <span className="font-medium text-gray-900">{viewingInvoice.quantity} KG</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Rate</span>
+                    <span className="font-medium text-gray-900">₹{viewingInvoice.rate}/Q</span>
+                  </div>
+                  
+                  {viewingInvoice.discount ? (
+                    <div className="flex justify-between text-sm text-red-500">
+                      <span>Discount</span>
+                      <span>-₹{viewingInvoice.discount.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+
+                  {viewingInvoice.gstAmount ? (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">GST ({viewingInvoice.gstPercent}%)</span>
+                      <span className="font-medium text-gray-900">+₹{viewingInvoice.gstAmount.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+
+                  {viewingInvoice.loadingCharge ? (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Loading</span>
+                      <span className="font-medium text-gray-900">+₹{viewingInvoice.loadingCharge.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+
+                  {viewingInvoice.transportCharge ? (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Transport</span>
+                      <span className="font-medium text-gray-900">+₹{viewingInvoice.transportCharge.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Payment Details */}
+              {viewingInvoice.paymentStatus === 'Paid' && (
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Payment Details</p>
+                  {paymentDetails ? (
+                    <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl text-sm">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-600">Amount Received</span>
+                        <span className="font-bold text-blue-900">₹{paymentDetails.amount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-600">Mode</span>
+                        <span className="font-medium text-gray-900">{paymentDetails.paymentMode}</span>
+                      </div>
+                      {paymentDetails.reference && (
+                        <div className="flex justify-between mb-1">
+                          <span className="text-gray-600">Reference</span>
+                          <span className="font-medium text-gray-900">{paymentDetails.reference}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>Date</span>
+                        <span>{new Date(paymentDetails.createdAt).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 italic">Payment received. Details not available in this view.</div>
+                  )}
+                </div>
+              )}
+
+            </div>
+
+            {/* Footer Actions */}
+            <div className="p-4 border-t bg-gray-50">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm text-gray-600 font-bold">Grand Total</span>
+                <span className="text-2xl font-black text-primary">₹{viewingInvoice.grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+              </div>
+              
+              {viewingInvoice.paymentStatus === 'Draft' ? (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleFinalizeDraft(viewingInvoice._id)}
+                    disabled={isFinalizing}
+                    className="w-full bg-primary text-white font-bold py-2.5 rounded-xl hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {isFinalizing ? 'Finalizing...' : 'Finalize Invoice'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => window.print()}
+                  className="w-full bg-gray-900 text-white font-bold py-2.5 rounded-xl hover:bg-gray-800 flex items-center justify-center"
+                >
+                  <Printer className="w-4 h-4 mr-2" /> Print Invoice
+                </button>
+              )}
+            </div>
+            
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

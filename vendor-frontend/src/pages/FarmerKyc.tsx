@@ -59,6 +59,39 @@ const FarmerKyc = () => {
   const [farmerPurchases, setFarmerPurchases] = useState<any[]>([]);
   const [farmerLedgers, setFarmerLedgers] = useState<any[]>([]);
 
+  // Touch Swipe State
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const tabs = ['Basic Info', 'Land Documents', 'Identity', 'Bank', 'Purchase History', 'Ledger'];
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe || isRightSwipe) {
+      const currentIndex = tabs.indexOf(activeTab);
+      if (isLeftSwipe && currentIndex < tabs.length - 1) {
+        setActiveTab(tabs[currentIndex + 1]);
+      }
+      if (isRightSwipe && currentIndex > 0) {
+        setActiveTab(tabs[currentIndex - 1]);
+      }
+    }
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadType, setUploadType] = useState('7/12');
   const [docMeta, setDocMeta] = useState({ surveyNumber: '', documentNumber: '', remarks: '' });
@@ -258,7 +291,7 @@ const FarmerKyc = () => {
 
         {/* Tabs */}
         <div className="bg-white border-b flex overflow-x-auto hide-scrollbar">
-          {['Basic Info', 'Land Documents', 'Identity', 'Bank', 'Purchase History', 'Ledger'].map(tab => (
+          {tabs.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -270,7 +303,12 @@ const FarmerKyc = () => {
           ))}
         </div>
 
-        <div className="p-4 max-w-md mx-auto">
+        <div 
+          className="p-4 max-w-md mx-auto min-h-[50vh]"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           {/* TAB: BASIC INFO */}
           {activeTab === 'Basic Info' && (
             <form onSubmit={saveBasicInfo} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4 animate-in fade-in slide-in-from-bottom-2">
