@@ -51,7 +51,18 @@ interface Bill {
   billNumber: string;
   farmerId: Farmer;
   commodityId: Commodity;
+  grossWeight: number;
+  bagWeight: number;
+  bagCount: number;
   netWeight: number;
+  rate: number;
+  deductionsApplied: Array<{
+    name: string;
+    type: string;
+    value: number;
+    amount: number;
+  }>;
+  totalAmount: number;
   netPayable: number;
   paymentStatus: string;
   status: 'Draft' | 'Finalized';
@@ -71,6 +82,11 @@ const PurchaseBilling = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'Finalized' | 'Draft'>('Finalized');
   const [editingBillId, setEditingBillId] = useState<string | null>(null);
+
+  // Detail View State
+  const [viewingBill, setViewingBill] = useState<Bill | null>(null);
+  const [paymentDetails, setPaymentDetails] = useState<any | null>(null);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   // Farmer Search & Modal State
   const [farmerSearchQuery, setFarmerSearchQuery] = useState('');
@@ -145,9 +161,52 @@ const PurchaseBilling = () => {
     setEditingBillId(bill._id);
     setFarmerId(bill.farmerId._id);
     setCommodityId(bill.commodityId._id);
-    // You would typically fetch the full details if you didn't populate them all in the list view,
-    // but for now we'll just set what we have and open the modal. In a real app we'd load the weights back.
+    setGrossWeight(bill.grossWeight || 0);
+    setBagWeight(bill.bagWeight || 0);
+    setBagCount(bill.bagCount || 0);
+    setViewingBill(null);
     setIsModalOpen(true);
+  };
+
+  const handleViewBill = async (bill: Bill) => {
+    setViewingBill(bill);
+    setPaymentDetails(null);
+    if (bill.paymentStatus === 'Paid') {
+      try {
+        const res = await fetch(`${API_BASE}/ledgers?tenantId=${vendor?.tenantId}&partyId=${bill.farmerId._id}`);
+        const data = await res.json();
+        if (data.success && data.data.length > 0) {
+          // Find the most recent payment or a matching reference
+          const payment = data.data.find((e: any) => e.entryType === 'Debit' && e.paymentMode) || data.data[0];
+          setPaymentDetails(payment);
+        }
+      } catch (err) {
+        console.error('Failed to fetch payment details', err);
+      }
+    }
+  };
+
+  const handleFinalizeDraft = async (billId: string) => {
+    setIsFinalizing(true);
+    try {
+      const res = await fetch(`${API_BASE}/purchases/${billId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Finalized' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchData();
+        setViewingBill(null);
+        setActiveTab('Finalized');
+      } else {
+        alert(data.message || 'Failed to finalize draft');
+      }
+    } catch (err) {
+      alert('Error finalizing draft');
+    } finally {
+      setIsFinalizing(false);
+    }
   };
 
   // Math calculations
@@ -351,8 +410,12 @@ const PurchaseBilling = () => {
             </div>
           ) : (
             bills.filter(b => b.status === activeTab).map((bill) => (
-              <div key={bill._id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex justify-between items-center animate-fade-in">
-                <div onClick={() => activeTab === 'Draft' ? handleEditDraft(bill) : null} className={activeTab === 'Draft' ? 'cursor-pointer' : ''}>
+              <div 
+                key={bill._id} 
+                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex justify-between items-center animate-fade-in cursor-pointer hover:bg-gray-50 transition"
+                onClick={() => handleViewBill(bill)}
+              >
+                <div>
                   <h3 className="font-bold text-gray-950 text-sm">{bill.farmerId?.name}</h3>
                   <span className="text-[10px] text-gray-400 font-bold block uppercase tracking-wider">{bill.commodityId?.englishName}</span>
                   <div className="text-xs text-gray-500 mt-2 flex items-center">
@@ -696,6 +759,156 @@ const PurchaseBilling = () => {
                 <Send className="w-4 h-4 mr-2" /> Share WhatsApp
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bill Details Modal */}
+      {viewingBill && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col">
+            
+            {/* Header */}
+            <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+              <div>
+                <h3 className="font-black text-gray-900 text-lg">Bill {viewingBill.billNumber}</h3>
+                <p className="text-xs text-gray-500">{new Date(viewingBill.createdAt).toLocaleString()}</p>
+              </div>
+              <button onClick={() => setViewingBill(null)} className="text-gray-500 hover:text-gray-900">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 overflow-y-auto space-y-6 text-left">
+              
+              {/* Status Badges */}
+              <div className="flex gap-2">
+                <span className={`text-xs font-bold px-2 py-1 rounded ${viewingBill.status === 'Draft' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
+                  {viewingBill.status}
+                </span>
+                <span className={`text-xs font-bold px-2 py-1 rounded ${viewingBill.paymentStatus === 'Paid' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                  Payment: {viewingBill.paymentStatus}
+                </span>
+              </div>
+
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-gray-400">Farmer</p>
+                  <p className="font-semibold text-gray-900">{viewingBill.farmerId?.name}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-gray-400">Commodity</p>
+                  <p className="font-semibold text-gray-900">{viewingBill.commodityId?.englishName}</p>
+                </div>
+              </div>
+
+              {/* Weights */}
+              <div className="bg-gray-50 p-3 rounded-xl border space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Gross Weight</span>
+                  <span className="font-medium text-gray-900">{viewingBill.grossWeight?.toFixed(2) || 0} KG</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Bag Deduction ({viewingBill.bagCount || 0} bags)</span>
+                  <span className="text-red-500 font-medium">-{viewingBill.bagWeight?.toFixed(2) || 0} KG</span>
+                </div>
+                <div className="border-t pt-2 flex justify-between font-bold">
+                  <span className="text-gray-800">Net Weight</span>
+                  <span className="text-gray-900">{viewingBill.netWeight?.toFixed(2) || 0} KG</span>
+                </div>
+              </div>
+
+              {/* Deductions & Rate */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Pricing & Deductions</p>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Base Rate</span>
+                    <span className="font-medium text-gray-900">₹{viewingBill.rate || 0}/Q</span>
+                  </div>
+                  
+                  {viewingBill.deductionsApplied?.map((d: any, idx: number) => (
+                    <div key={idx} className="flex justify-between text-sm text-red-500">
+                      <span>{d.name} ({d.value}{d.type === 'Weight' ? 'KG' : '%'})</span>
+                      <span>-₹{d.amount.toFixed(2)}</span>
+                    </div>
+                  ))}
+                  
+                  <div className="flex justify-between text-sm font-medium pt-2 border-t mt-2">
+                    <span className="text-gray-600">Total Amount</span>
+                    <span>₹{viewingBill.totalAmount?.toLocaleString('en-IN', { maximumFractionDigits: 2 }) || viewingBill.netPayable.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Details */}
+              {viewingBill.paymentStatus === 'Paid' && (
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Payment Details</p>
+                  {paymentDetails ? (
+                    <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl text-sm">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-600">Amount Paid</span>
+                        <span className="font-bold text-blue-900">₹{paymentDetails.amount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-600">Mode</span>
+                        <span className="font-medium text-gray-900">{paymentDetails.paymentMode}</span>
+                      </div>
+                      {paymentDetails.reference && (
+                        <div className="flex justify-between mb-1">
+                          <span className="text-gray-600">Reference</span>
+                          <span className="font-medium text-gray-900">{paymentDetails.reference}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>Date</span>
+                        <span>{new Date(paymentDetails.createdAt).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 italic">Payment processed. Details not available in this view.</div>
+                  )}
+                </div>
+              )}
+
+            </div>
+
+            {/* Footer Actions */}
+            <div className="p-4 border-t bg-gray-50">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm text-gray-600 font-bold">Net Payable</span>
+                <span className="text-2xl font-black text-primary">₹{viewingBill.netPayable.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+              </div>
+              
+              {viewingBill.status === 'Draft' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => handleEditDraft(viewingBill)}
+                    className="bg-white border-2 border-gray-200 text-gray-700 font-bold py-2.5 rounded-xl hover:bg-gray-50"
+                  >
+                    Edit Draft
+                  </button>
+                  <button
+                    onClick={() => handleFinalizeDraft(viewingBill._id)}
+                    disabled={isFinalizing}
+                    className="bg-primary text-white font-bold py-2.5 rounded-xl hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {isFinalizing ? 'Finalizing...' : 'Finalize Bill'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => window.print()}
+                  className="w-full bg-gray-900 text-white font-bold py-2.5 rounded-xl hover:bg-gray-800 flex items-center justify-center"
+                >
+                  <Printer className="w-4 h-4 mr-2" /> Print Receipt
+                </button>
+              )}
+            </div>
+            
           </div>
         </div>
       )}
