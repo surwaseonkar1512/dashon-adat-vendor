@@ -454,65 +454,71 @@ const PurchaseBilling = () => {
             </div>
 
             <form onSubmit={(e) => handleSubmit(e, 'Finalized')} className="space-y-4 pb-8 text-left">
-              <div className="relative">
+              <div className="mb-4">
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Select Farmer</label>
-                
-                {/* Searchable Dropdown Trigger */}
-                <div 
-                  className="w-full border rounded-xl p-3 text-sm bg-white border-gray-200 flex justify-between items-center cursor-pointer"
-                  onClick={() => setIsFarmerDropdownOpen(!isFarmerDropdownOpen)}
-                >
-                  <span className={farmerId ? 'text-gray-900 font-medium' : 'text-gray-500'}>
-                    {farmerId ? farmers.find(f => f._id === farmerId)?.name : '-- Search Farmer --'}
-                  </span>
-                  <Search className="w-4 h-4 text-gray-400" />
-                </div>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    {/* Searchable Dropdown Trigger */}
+                    <div 
+                      className="w-full border rounded-xl p-3 text-sm bg-white border-gray-200 flex justify-between items-center cursor-pointer"
+                      onClick={() => setIsFarmerDropdownOpen(!isFarmerDropdownOpen)}
+                    >
+                      <span className={farmerId ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+                        {farmerId ? farmers.find(f => f._id === farmerId)?.name : '-- Search Farmer --'}
+                      </span>
+                      <Search className="w-4 h-4 text-gray-400" />
+                    </div>
 
-                {/* Dropdown Menu */}
-                {isFarmerDropdownOpen && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-hidden flex flex-col">
-                    <div className="p-2 border-b">
-                      <input 
-                        type="text" 
-                        autoFocus
-                        value={farmerSearchQuery}
-                        onChange={(e) => setFarmerSearchQuery(e.target.value)}
-                        placeholder="Search name, mobile, village..." 
-                        className="w-full bg-gray-50 border-none rounded-lg p-2 text-sm focus:ring-0"
-                      />
-                    </div>
-                    <div className="overflow-y-auto flex-1">
-                      {farmers.filter(f => 
-                        f.name.toLowerCase().includes(farmerSearchQuery.toLowerCase()) || 
-                        f.mobile.includes(farmerSearchQuery) || 
-                        f.village.toLowerCase().includes(farmerSearchQuery.toLowerCase())
-                      ).map(f => (
-                        <div 
-                          key={f._id} 
-                          className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-0"
-                          onClick={() => {
-                            setFarmerId(f._id);
-                            setIsFarmerDropdownOpen(false);
-                            setFarmerSearchQuery('');
-                          }}
-                        >
-                          <div className="font-semibold text-sm text-gray-900">{f.name}</div>
-                          <div className="text-xs text-gray-500">{f.mobile} • {f.village}</div>
+                    {/* Dropdown Menu */}
+                    {isFarmerDropdownOpen && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-hidden flex flex-col">
+                        <div className="p-2 border-b">
+                          <input 
+                            type="text" 
+                            autoFocus
+                            value={farmerSearchQuery}
+                            onChange={(e) => setFarmerSearchQuery(e.target.value)}
+                            placeholder="Search name, mobile, village..." 
+                            className="w-full bg-gray-50 border-none rounded-lg p-2 text-sm focus:ring-0"
+                          />
                         </div>
-                      ))}
-                      {/* Add New Option */}
-                      <div 
-                        className="p-3 bg-green-50 text-green-700 hover:bg-green-100 cursor-pointer flex items-center justify-center font-semibold"
-                        onClick={() => {
-                          setIsFarmerDropdownOpen(false);
-                          setIsSmartFarmerModalOpen(true);
-                        }}
-                      >
-                        <UserPlus className="w-4 h-4 mr-2" /> Add New Farmer
+                        <div className="overflow-y-auto flex-1">
+                          {farmers.filter(f => 
+                            f.name.toLowerCase().includes(farmerSearchQuery.toLowerCase()) || 
+                            f.mobile.includes(farmerSearchQuery) || 
+                            f.village.toLowerCase().includes(farmerSearchQuery.toLowerCase())
+                          ).map(f => (
+                            <div 
+                              key={f._id} 
+                              className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-0"
+                              onClick={() => {
+                                setFarmerId(f._id);
+                                setIsFarmerDropdownOpen(false);
+                                setFarmerSearchQuery('');
+                              }}
+                            >
+                              <div className="font-semibold text-sm text-gray-900">{f.name}</div>
+                              <div className="text-xs text-gray-500">{f.mobile} • {f.village}</div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
-                )}
+                  
+                  {/* Add New Farmer Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsFarmerDropdownOpen(false);
+                      setIsSmartFarmerModalOpen(true);
+                    }}
+                    className="bg-green-50 text-green-700 hover:bg-green-100 border border-green-100 rounded-xl p-3 flex items-center justify-center transition-colors shadow-sm"
+                    title="Add New Farmer"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               <div>
